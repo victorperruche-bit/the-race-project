@@ -11,7 +11,7 @@ cmake_install.cmake
 Makefile
 
 # IDE
-.vscode/
+$# .vscode/
 *.suo
 *.user
 *.userosscache

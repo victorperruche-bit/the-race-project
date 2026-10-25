@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "*.h": "cpp",
+        "*.ino": "cpp"
+    },
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/Code/simulation_cpp/include"
+    ],
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.env.windows": {
+        "PATH": "C:\msys64\mingw64\bin;C:\msys64\usr\bin;${env:PATH}"
+    }
+}

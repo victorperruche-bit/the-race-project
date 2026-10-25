@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build C++ (g++)",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-Wall",
+                "-Wextra",
+                "-I${workspaceFolder}/Code/simulation_cpp/include",
+                "${workspaceFolder}/Code/simulation_cpp/src/main.cpp",
+                "${workspaceFolder}/Code/simulation_cpp/src/Robot.cpp",
+                "${workspaceFolder}/Code/simulation_cpp/src/CapteurUltrason.cpp",
+                "${workspaceFolder}/Code/simulation_cpp/src/CorrecteurPD.cpp",
+                "-o",
+                "${workspaceFolder}/Code/simulation_cpp/build/the_race.exe"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Run Simulation",
+            "type": "shell",
+            "command": "${workspaceFolder}/Code/simulation_cpp/build/the_race.exe",
+            "group": "test",
+            "dependsOn": "Build C++ (g++)",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Git: Commit & Push",
+            "type": "shell",
+            "command": "git add -A && git commit -m \"${input:commitMessage}\" && git push",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "commitMessage",
+            "type": "promptString",
+            "description": "Message du commit"
+        }
+    ]
+}

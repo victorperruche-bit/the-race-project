@@ -6,7 +6,9 @@
 Robot::Robot()
     : capteurGauche_("Gauche")
     , capteurDroit_("Droit")
-    , correcteur_(config::KP, config::KD)
+    , correcteur_(config::KP, config::KD, config::DT_S,
+                  -config::CORRECTION_MAX, config::CORRECTION_MAX,
+                  config::ZONE_MORTE_CM)
     , positionSimulee_(config::POSITION_DEPART_CM)
 {
 }
@@ -35,7 +37,7 @@ bool Robot::etapeRegulation()
     // erreur < 0  => mur gauche plus loin => robot trop à droite => tourner à gauche
     erreur_ = dD - dG;
 
-    // --- Correction PD ---
+    // --- Correction PD (avec saturation intégrée dans le correcteur) ---
     double correction = correcteur_.calculer(erreur_);
 
     // --- Application aux moteurs ---
@@ -46,7 +48,7 @@ bool Robot::etapeRegulation()
     int pwmG = vitesseBase + static_cast<int>(correction);
     int pwmD = vitesseBase - static_cast<int>(correction);
 
-    // Saturation
+    // Saturation finale (sécurité)
     pwmGauche_ = std::clamp(pwmG, config::PWM_MINI, config::PWM_MAX);
     pwmDroit_  = std::clamp(pwmD, config::PWM_MINI, config::PWM_MAX);
 

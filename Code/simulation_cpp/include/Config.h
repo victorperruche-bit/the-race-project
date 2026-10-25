@@ -22,8 +22,11 @@ constexpr int PWM_MINI       = 60;   // PWM minimum pour démarrer les moteurs
 constexpr int PWM_MAX        = 255;  // PWM maximum
 
 // --- Correcteur PD ---
-constexpr double KP = 1.2;   // gain proportionnel
-constexpr double KD = 0.35;  // gain dérivé
+constexpr double KP = 1.2;              // gain proportionnel (PWM/cm)
+constexpr double KD = 0.0175;           // gain dérivé (PWM·s/cm) — ajusté pour dt=50ms
+constexpr double DT_S = 0.05;           // pas de temps = 50 ms (période boucle)
+constexpr double CORRECTION_MAX = 255.0; // saturation PWM du correcteur
+constexpr double ZONE_MORTE_CM = 2.0;    // zone morte anti-oscillation (cm)
 
 // --- Ralentissement progressif ---
 constexpr int SEUIL_RALENTI_1 = 15;  // écart (cm) -> vitesse x 0.70

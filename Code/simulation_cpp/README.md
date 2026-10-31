@@ -86,3 +86,29 @@ Après chaque scénario, le programme affiche :
 > **Note** : Le code Arduino ESP32-CAM utilise 3 capteurs (AVANT/GAUCHE/DROITE)
 > pour la détection d'obstacles et les virages. La simulation PC se concentre
 > sur le suivi de couloir pur (2 capteurs G/D), identique au robot de base.
+
+## Tests automatiques (`tests/test_robot.cpp`)
+
+Suite de tests qui vérifie les deux comportements clés du robot :
+
+1. **Recentrage au centre du couloir** : au centre → tout droit ; trop à
+   gauche → tourne à droite ; trop à droite → tourne à gauche ; convergence
+   vers le centre (à moins de 1,5 cm) sur un couloir simulé de 80 cm.
+2. **Rotation à droite hors portée** : une distance > 200 cm (ou invalide)
+   déclenche la rotation sur place à droite (roue gauche en avant, roue
+   droite en arrière), et le robot reprend le suivi dès que les deux murs
+   réapparaissent.
+
+Lancement depuis la racine du projet (ou tâche VS Code « Build & Run Tests ») :
+
+```bash
+g++ -std=c++17 -Wall -Wextra -I Code/simulation_cpp/include \
+    Code/simulation_cpp/tests/test_robot.cpp \
+    Code/simulation_cpp/src/Robot.cpp \
+    Code/simulation_cpp/src/CapteurUltrason.cpp \
+    Code/simulation_cpp/src/CorrecteurPD.cpp \
+    -o Code/simulation_cpp/build/test_robot.exe
+./Code/simulation_cpp/build/test_robot.exe
+```
+
+Avec CMake : `cmake --build build && cd build && ctest`

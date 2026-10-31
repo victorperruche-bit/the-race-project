@@ -39,6 +39,20 @@
             }
         },
         {
+            "label": "Build & Run Tests",
+            "type": "shell",
+            "command": "g++ -std=c++17 -Wall -Wextra -I Code/simulation_cpp/include Code/simulation_cpp/tests/test_robot.cpp Code/simulation_cpp/src/Robot.cpp Code/simulation_cpp/src/CapteurUltrason.cpp Code/simulation_cpp/src/CorrecteurPD.cpp -o Code/simulation_cpp/build/test_robot.exe && Code/simulation_cpp/build/test_robot.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
             "label": "Git: Commit & Push",
             "type": "shell",
             "command": "git add -A && git commit -m \"${input:commitMessage}\" && git push",

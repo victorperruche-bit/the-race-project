@@ -21,3 +21,16 @@ add_executable(the_race
 )
 
 target_include_directories(the_race PRIVATE include)
+
+# Tests automatiques (recentrage + rotation hors portee)
+add_executable(test_robot
+    tests/test_robot.cpp
+    src/Robot.cpp
+    src/CapteurUltrason.cpp
+    src/CorrecteurPD.cpp
+)
+target_include_directories(test_robot PRIVATE include)
+
+# ctest : lance les tests via "ctest" dans le dossier build
+enable_testing()
+add_test(NAME tests_robot COMMAND test_robot)

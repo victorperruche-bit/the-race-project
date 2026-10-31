@@ -1,5 +1,8 @@
 # 🏁 Simulateur web — The Race Project
 
+**Version en ligne :**
+<https://victorperruche-bit.github.io/the-race-project/Code/simulateur_web/>
+
 Mini-application **100 % autonome** (aucune installation, aucun serveur, aucune
 dépendance) qui simule la machine de course dans le bâtiment : **double-clic sur
 `index.html`** et c'est parti.

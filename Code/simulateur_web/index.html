@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🏁 The Race Project — Simulateur de course</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🏁 The Race Project</h1>
+    <p class="sub">
+      Simulateur de la machine de course — 7 parcours prédéfinis ou le tien, étape par étape
+      · 2 moteurs DC, 2 capteurs HC-SR04
+    </p>
+  </div>
+  <div class="badges">
+    <span class="badge" id="badge-route">—</span>
+    <span class="badge" id="badge-laps">Tour 0/3</span>
+    <span class="badge" id="badge-time">⏱ 0:00.0</span>
+    <span class="badge best" id="badge-best">🏆 —</span>
+  </div>
+</header>
+
+<main>
+  <!-- ============ circuit ============ -->
+  <section>
+    <div class="track-box">
+      <canvas id="track"></canvas>
+      <div id="overlay" class="overlay hidden">
+        <div class="title" id="overlay-title"></div>
+        <p id="overlay-text"></p>
+        <button class="btn primary" id="overlay-btn">↺ Réinitialiser</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn primary" id="btn-run">▶ Démarrer</button>
+      <button class="btn" id="btn-reset">↺ Réinitialiser</button>
+      <span class="speed-group">
+        <button class="btn speed-btn active" data-s="1">×1</button>
+        <button class="btn speed-btn" data-s="2">×2</button>
+        <button class="btn speed-btn" data-s="4">×4</button>
+      </span>
+      <label class="chk"><input type="checkbox" id="chk-beams" checked> Rayons capteurs</label>
+      <span class="legend">🟢 capteur gauche · 🔴 capteur droit · tirets = plus d'écho → action suivante du plan</span>
+    </div>
+  </section>
+
+  <!-- ============ colonne droite ============ -->
+  <aside>
+    <!-- parcours -->
+    <div class="card">
+      <h3>🗺️ Choisis ton parcours</h3>
+      <p class="hint">
+        Avant de lancer : le plan de course embarqué (capteur surveillé → action).
+        ↱ virage droite · ↰ virage gauche · ↑ tout droit à la jonction.
+      </p>
+      <div id="route-list"></div>
+
+      <div class="composer">
+        <p class="hint" style="margin-top:0"><b>🛠️ Ou compose ton parcours</b><br>
+          Choisis le départ, puis empile tes étapes : le mur surveillé disparaît → ton action.
+          « Tout droit » surveille les deux capteurs (jonction à franchir).
+          Clique sur une étape du plan pour la retirer.
+        </p>
+        <div class="chips" id="start-chips"></div>
+        <div class="chips" id="steps-chips"></div>
+        <div class="add-row">
+          <button class="btn small" id="add-r">+ ↱ Droite</button>
+          <button class="btn small" id="add-s">+ ↑ Tout droit</button>
+          <button class="btn small" id="add-l">+ ↰ Gauche</button>
+          <button class="btn small ghost" id="clear-steps">Tout effacer</button>
+        </div>
+        <button class="btn primary wide" id="use-custom" disabled>▶ Utiliser mon parcours</button>
+      </div>
+    </div>
+
+    <!-- réglages -->
+    <div class="card">
+      <h3>🎛️ Réglages en direct</h3>
+      <div id="params-list"></div>
+    </div>
+
+    <!-- télémétrie -->
+    <div class="card">
+      <div class="tele-title">
+        <h3>📡 Télémétrie</h3>
+        <span class="status align" id="status-badge">Centrage actif</span>
+      </div>
+      <div class="tele-row">
+        <span>👀 Étape</span>
+        <span class="mono" id="step-info">—</span>
+      </div>
+      <div style="font-size:12px">🟢 Capteur gauche <span class="mono" style="float:right" id="txt-g">—</span></div>
+      <div class="bar"><div class="fill-g" id="bar-g" style="width:0%"></div></div>
+      <div style="font-size:12px">🔴 Capteur droit <span class="mono" style="float:right" id="txt-d">—</span></div>
+      <div class="bar"><div class="fill-d" id="bar-d" style="width:0%"></div></div>
+      <div class="tele-grid">
+        <div class="tele-cell"><div class="lbl">Écart au centre</div><div class="mono" id="txt-err">—</div></div>
+        <div class="tele-cell"><div class="lbl">Vitesse</div><div class="mono" id="txt-v">0.00 m/s</div></div>
+      </div>
+      <div style="font-size:12px">⚙️ Moteur gauche (PWM) <span class="mono" style="float:right" id="txt-pg">0</span></div>
+      <div class="bar"><div class="fill-pg" id="bar-pg" style="width:0%"></div></div>
+      <div style="font-size:12px">⚙️ Moteur droit (PWM) <span class="mono" style="float:right" id="txt-pd">0</span></div>
+      <div class="bar"><div class="fill-pd" id="bar-pd" style="width:0%"></div></div>
+      <div class="tele-grid3">
+        <div class="tele-cell"><div class="lbl">Dernier tour</div><div class="mono" id="txt-lastlap">—</div></div>
+        <div class="tele-cell"><div class="lbl">Record</div><div class="mono" id="txt-record">—</div></div>
+        <div class="tele-cell"><div class="lbl">Collisions</div><div class="mono" id="txt-crash">0</div></div>
+      </div>
+    </div>
+
+    <!-- logique -->
+    <div class="card logic">
+      <h3>🧠 La logique embarquée</h3>
+      <p>1️⃣ <b>Rester au milieu</b> : la machine ne se cale que si les deux murs se font face à 2 m
+        (signature du couloir : |dG + dD − 2| &lt; 0,4). Erreur = dG − dD, corrigée en PD —
+        KP accroche, KD amortit.</p>
+      <p>2️⃣ <b>Le plan de course</b> : à chaque étape, un capteur (ou les deux, aux jonctions) surveille
+        un mur. S'il le perd (plus d'écho, ou écho invraisemblable &gt; 1,45 m hors couloir) après au
+        moins 2,5 m parcourus → l'étape suivante : <b>virage à droite</b> (capteur droit),
+        <b>virage à gauche</b> (capteur gauche) ou <b>tout droit</b> (jonction à franchir).</p>
+      <p>3️⃣ <b>Jonction</b> : tout droit — et si un seul mur reste visible, la machine le tient à ~1 m
+        (tenue monopalpe) pour ne pas dériver en aveugle, jusqu'à retrouver les deux murs du couloir
+        suivant.</p>
+      <p class="note">
+        Objectif : boucler 3 tours sans toucher les murs. Records à battre : ≈ 38,5 s le tour autour
+        d'un bloc (61,9 s en grand tour) au réglage par défaut. Raccourcis : Espace = départ/pause,
+        R = réinitialiser.
+      </p>
+    </div>
+  </aside>
+</main>
+
+<!-- ============ code Arduino simulé ============ -->
+<details id="code-panel">
+  <summary><span>💻 Code Arduino simulé</span>
+    <span class="small">les curseurs modifient les constantes en direct</span></summary>
+  <pre id="code-block"></pre>
+</details>
+
+<script src="sim.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

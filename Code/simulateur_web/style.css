@@ -1,0 +1,199 @@
+/* ============================================================
+   THE RACE PROJECT — Simulateur de course (mini app)
+   Thème sombre "slate", un seul fichier CSS, aucune dépendance
+   ============================================================ */
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --card-border: #1e293b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #10b981;
+  --accent-hover: #34d399;
+  --track-bg: #0b1a2e;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  padding: 16px;
+}
+
+/* ---------- en-tête ---------- */
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+header h1 { margin: 0; font-size: 22px; }
+header .sub { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.badge.best { border-color: rgba(52, 211, 153, 0.4); color: #6ee7b7; }
+
+/* ---------- grille principale ---------- */
+main { margin-top: 14px; display: grid; gap: 14px; }
+@media (min-width: 1000px) { main { grid-template-columns: minmax(0, 1fr) 340px; } }
+
+/* ---------- circuit ---------- */
+.track-box {
+  position: relative;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--track-bg);
+}
+#track { display: block; width: 100%; height: auto; }
+
+.overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; text-align: center;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 16px;
+}
+.overlay.hidden { display: none; }
+.overlay .title { font-size: 26px; font-weight: 700; }
+.overlay.crash .title { color: #fca5a5; }
+.overlay.fin .title { color: #6ee7b7; }
+.overlay p { margin: 0; max-width: 460px; color: #cbd5e1; font-size: 13px; }
+
+/* ---------- contrôles ---------- */
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.btn {
+  border: 1px solid var(--card-border);
+  background: #1e293b;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn:hover { border-color: #64748b; }
+.btn.primary { background: #059669; border-color: #059669; }
+.btn.primary:hover { background: #10b981; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.speed-group { display: inline-flex; border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; }
+.speed-group .btn { border: 0; border-radius: 0; padding: 7px 12px; }
+.speed-group .btn.active { background: #059669; color: #fff; }
+.chk { display: inline-flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 13px; cursor: pointer; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; }
+.legend { margin-left: auto; font-size: 11.5px; color: #64748b; }
+
+/* ---------- cartes ---------- */
+.card { background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; }
+.card h3 { margin: 0 0 8px; font-size: 15px; }
+.card .hint { color: var(--muted); font-size: 11.5px; margin: 4px 0 8px; }
+aside { display: flex; flex-direction: column; gap: 14px; }
+
+/* ---------- parcours ---------- */
+.route-btn {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  width: 100%;
+  border: 1px solid #334155;
+  background: rgba(30, 41, 59, 0.4);
+  color: #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  margin-bottom: 6px;
+  text-align: left;
+}
+.route-btn:hover { border-color: #64748b; }
+.route-btn.selected { border-color: rgba(52, 211, 153, 0.6); background: rgba(16, 185, 129, 0.1); color: #a7f3d0; }
+.route-btn .plan { font-family: Consolas, monospace; font-size: 10.5px; letter-spacing: 0.5px; color: #94a3b8; white-space: nowrap; }
+.composer { border-top: 1px solid rgba(51, 65, 85, 0.6); margin-top: 10px; padding-top: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
+.chip {
+  border: 1px solid #334155;
+  background: rgba(30, 41, 59, 0.4);
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.chip:hover { border-color: #64748b; }
+.chip.selected { border-color: rgba(56, 189, 248, 0.6); background: rgba(14, 165, 233, 0.15); color: #bae6fd; }
+.chip.step { font-family: Consolas, monospace; color: #e2e8f0; }
+.chip.step:hover { border-color: rgba(248, 113, 113, 0.6); color: #fca5a5; }
+.chip-label { font-size: 11px; color: #64748b; margin-right: 2px; }
+.add-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.btn.small { padding: 4px 10px; font-size: 12px; }
+.btn.ghost { background: transparent; }
+.btn.wide { width: 100%; margin-top: 4px; }
+
+/* ---------- réglages ---------- */
+.param { margin-bottom: 13px; }
+.param .row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 4px; }
+.param .val { background: #1e293b; border-radius: 6px; padding: 2px 8px; font-size: 11.5px; color: #cbd5e1; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); height: 20px; margin: 0; }
+
+/* ---------- télémétrie ---------- */
+.status { border-radius: 999px; padding: 2px 10px; font-size: 11.5px; white-space: nowrap; border: 1px solid; }
+.status.align { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.4); }
+.status.turn { background: rgba(249, 115, 22, 0.2); color: #fdba74; border-color: rgba(251, 146, 60, 0.4); }
+.status.recentre { background: rgba(234, 179, 8, 0.15); color: #fde047; border-color: rgba(250, 204, 21, 0.4); }
+.status.transit { background: rgba(14, 165, 233, 0.15); color: #7dd3fc; border-color: rgba(56, 189, 248, 0.4); }
+.status.crash { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border-color: rgba(248, 113, 113, 0.4); }
+.status.fin { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.4); }
+
+.tele-row { display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); border-radius: 8px; padding: 5px 9px; font-size: 12px; margin-bottom: 6px; }
+.tele-row .mono { font-family: Consolas, monospace; }
+.tele-row b.g { color: #6ee7b7; }
+.tele-row b.d { color: #fca5a5; }
+.tele-row b.b { color: #7dd3fc; }
+.bar { height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin: 3px 0 8px; }
+.bar > div { height: 100%; border-radius: 4px; transition: width 0.08s linear; }
+.fill-g { background: #10b981; }
+.fill-d { background: #ef4444; }
+.fill-pg { background: #0ea5e9; }
+.fill-pd { background: #6366f1; }
+.tele-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+.tele-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
+.tele-cell { background: rgba(30, 41, 59, 0.6); border-radius: 8px; padding: 6px 8px; font-size: 11px; text-align: center; }
+.tele-cell .lbl { color: var(--muted); }
+.tele-cell .mono { font-family: Consolas, monospace; font-size: 13px; }
+.tele-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.tele-title h3 { margin: 0; }
+
+/* ---------- logique ---------- */
+.logic p { margin: 5px 0; font-size: 12.5px; color: #cbd5e1; }
+.logic .note { color: var(--muted); font-size: 11.5px; }
+
+/* ---------- code Arduino ---------- */
+#code-panel { margin-top: 14px; }
+#code-panel summary {
+  cursor: pointer; list-style: none;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: var(--card);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px;
+}
+#code-panel summary::-webkit-details-marker { display: none; }
+#code-panel summary .small { color: var(--muted); font-size: 11.5px; }
+#code-panel pre {
+  margin: 10px 0 0;
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 14px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.55;
+  font-family: Consolas, "Courier New", monospace;
+  color: #cbd5e1;
+}
+#code-panel .hl { background: rgba(16, 185, 129, 0.15); border-radius: 4px; padding: 0 3px; color: #6ee7b7; font-weight: 700; }

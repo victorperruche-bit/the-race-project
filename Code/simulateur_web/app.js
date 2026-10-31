@@ -16,13 +16,17 @@ var PARAM_DEFS = [
     fmt: function (v) { return v + " PWM·s/m — 0 = ça oscille !"; } },
   { key: "portee", label: "📡 Portée des capteurs", min: 1.5, max: 4, step: 0.25,
     fmt: function (v) { return v.toFixed(2) + " m (HC-SR04)"; } },
+  { key: "vmax", label: "🏃 Vitesse max réelle (VMAX_M)", min: 0.5, max: 3, step: 0.05,
+    fmt: function (v) { return v.toFixed(2) + " m/s à PWM 255 — à calibrer"; } },
   { key: "virage", label: "↩️ Vitesse du virage", min: 40, max: 200, step: 5,
     fmt: function (v) { return v + " PWM"; } },
+  { key: "tpsVirage", label: "⏱️ Durée virage 90° (TEMPS_VIRAGE_90_MS)", min: 600, max: 3000, step: 50,
+    fmt: function (v) { return v + " ms (robot réel : pivot ≈ 420 ms)"; } },
   { key: "bruit", label: "🎲 Bruit des capteurs", min: 0, max: 8, step: 1,
     fmt: function (v) { return "± " + v + " cm"; } },
 ];
 
-var params = { vitesse: 160, kp: 60, kd: 30, portee: 4, virage: 120, bruit: 2 };
+var params = { vitesse: 160, kp: 60, kd: 30, portee: 4, vmax: 1.5, virage: 120, tpsVirage: 2100, bruit: 2 };
 var routeId = "bg-h";
 var customSteps = [];      // "R" | "L" | "S"
 var customStartId = "w-n";
@@ -447,7 +451,9 @@ var CODE_LINES = [
   "const float KP         = {{kp}};     // gain de centrage (PWM par m)",
   "const float KD         = {{kd}};     // amortissement (PWM·s/m)",
   "const float PORTEE     = {{portee}};  // portée capteur HC-SR04 (m)",
+  "const float VMAX_M     = {{vmax}};   // vitesse réelle à PWM 255 (m/s) — À CALIBRER",
   "const int   VIRAGE_PWM = {{virage}};   // PWM pendant le virage",
+  "const int   TEMPS_VIRAGE_90_MS = {{tpsVirage}}; // durée d'un quart de tour — À CALIBRER",
   "",
   "/* ── Plan de course : une action par étape ──",
   "   PLAN_CAPTEUR : capteur surveillé ('D' droite, 'G' gauche,",
@@ -554,7 +560,9 @@ function renderCode() {
     kp: params.kp,
     kd: params.kd,
     portee: params.portee.toFixed(2),
+    vmax: params.vmax.toFixed(2),
     virage: params.virage,
+    tpsVirage: params.tpsVirage,
     caps: caps.join(", "),
     acts: acts.join(", "),
     n: route.steps.length,

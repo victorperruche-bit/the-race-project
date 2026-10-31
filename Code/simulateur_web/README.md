@@ -20,7 +20,13 @@ Raccourcis : `Espace` = départ/pause, `R` = réinitialiser.
 - **Composeur de parcours libre** : choisis le départ (5 couloirs), empile tes
   étapes (↱ droite / ↰ gauche / ↑ tout droit à la jonction), lance.
 - **Réglages en direct** : vitesse, KP, KD, portée capteurs, vitesse de virage,
-  bruit des capteurs (± cm).
+  bruit des capteurs (± cm), et les **2 constantes de calibration du robot
+  réel** (cf. `the_race_plan.ino` v3) :
+  - `VMAX_M` : vitesse réelle à PWM 255 (m/s) — à mesurer sur ton robot ;
+  - `TEMPS_VIRAGE_90_MS` : durée d'un quart de tour. Sur le robot réel c'est
+    un pivot sur place (~420 ms) ; dans la simulation le virage est un **arc**
+    (la machine balaie le coin), la valeur par défaut **2100 ms** reproduit la
+    géométrie validée.
 - **Télémétrie** : distances, écart au centre, vitesse, PWM moteurs, dernier
   tour, record, collisions.
 - **Panneau « Code Arduino simulé »** : la logique affichée avec les constantes

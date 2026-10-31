@@ -4,9 +4,8 @@
    Exposé en variables globales : ROUTES, CUSTOM_STARTS, makeSim, tick, ...
    ===================================================================== */
 
-var VMAX = 1.5;        // vitesse max de la machine (m/s)
+var VMAX = 1.5;        // (obsolète : utiliser P.vmax = VMAX_M du robot reel)
 var TRACKW = 0.2;      // voie entre les roues (m)
-var R_TURN = 0.95;     // rayon du virage = demi-largeur du couloir (m)
 var T = 0.35;          // épaisseur des murs extérieurs
 var REARM = 1.5;       // réarmement : les 2 murs vus à moins de 1,5 m
 var CAP = 2.0;         // au-delà de 2 m, un écho n'est plus "le mur du couloir"
@@ -239,8 +238,12 @@ function tick(s, P, dt) {
 
   if (s.mode === "TURN") {
     var dir = s.turnDir;
-    var vT = (P.virage / 255) * VMAX;
-    var om = vT / R_TURN;
+    // translation pendant le virage (arc), comme le modele valide
+    var vT = (P.virage / 255) * P.vmax;
+    // duree du quart de tour = TEMPS_VIRAGE_90_MS du .ino (P.tpsVirage en ms).
+    // Robot reel : pivot sur place (~420 ms). Simulation : arc, ~2100 ms par
+    // defaut (defaut valide, la machine balaie le coin pendant le virage).
+    var om = (Math.PI / 2) / (P.tpsVirage / 1000);
     var dth = dir * om * dt;
     // le virage se termine à l'angle exact (pas de dépassement)
     if (Math.abs(s.turned + dth) >= Math.PI / 2) dth = dir * (Math.PI / 2 - s.turned);
@@ -276,7 +279,7 @@ function tick(s, P, dt) {
       var cmd = clamp(P.kp * s.err + P.kd * s.errRate, -150, 150);
       s.pwmG = clamp(P.vitesse + cmd, 0, 255);
       s.pwmD = clamp(P.vitesse - cmd, 0, 255);
-      var vG = (s.pwmG / 255) * VMAX, vD = (s.pwmD / 255) * VMAX;
+      var vG = (s.pwmG / 255) * P.vmax, vD = (s.pwmD / 255) * P.vmax;
       var v = (vG + vD) / 2;
       s.x += v * Math.cos(s.th) * dt;
       s.y += v * Math.sin(s.th) * dt;

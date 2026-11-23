@@ -1,1 +1,86 @@
+/* =====================================================================
+   THE RACE PROJECT - VERSION SIMPLIFIEE POUR L'ORAL
+   Victor PERRUCHE - Lycee Eiffel Dijon - TSI1
 
+   Idee en une phrase : le robot se sert de ses 2 capteurs a ultrasons
+   (gauche et droit) pour rester AU MILIEU du couloir, et tourne quand
+   un mur lateral disparait (= ouverture a prendre).
+   ===================================================================== */
+
+// ---------------- CABLAGE ----------------
+// Capteurs HC-SR04
+const int TRIG_G = 2, ECHO_G = 3;
+const int TRIG_D = 4, ECHO_D = 5;
+// Pont en H L298N
+const int ENA = 9,  IN1 = 8,  IN2 = 12;  // moteur gauche
+const int ENB = 10, IN3 = 11, IN4 = 13;  // moteur droit
+
+// ---------------- REGLAGES ----------------
+const int   VITESSE = 160;  // vitesse de croisiere (0 a 255)
+const float KP      = 10;   // gain du correcteur : plus grand = robot nerveux
+const float MUR_MAX = 200;  // au-dela, on considere qu'il n'y a pas de mur (cm)
+
+// Mesure de distance (cm) avec un capteur HC-SR04
+float mesurer(int trig, int echo) {
+  digitalWrite(trig, LOW);  delayMicroseconds(2);
+  digitalWrite(trig, HIGH); delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  unsigned long duree = pulseIn(echo, HIGH, 25000); // attend l'echo (max 25 ms)
+  return duree * 0.0343 / 2;  // duree -> distance (vitesse du son / aller-retour)
+}
+
+// Commande un moteur : v entre -255 (recule) et +255 (avance)
+void moteur(int en, int in1, int in2, int v) {
+  digitalWrite(in1, v >= 0);
+  digitalWrite(in2, v <  0);
+  analogWrite(en, abs(v));
+}
+
+// Fait tourner le robot sur place (v > 0 : a droite, v < 0 : a gauche)
+void tourner(int v) {
+  moteur(ENA, IN1, IN2, v);
+  moteur(ENB, IN3, IN4, -v);
+}
+
+void setup() {
+  pinMode(TRIG_G, OUTPUT); pinMode(ECHO_G, INPUT);
+  pinMode(TRIG_D, OUTPUT); pinMode(ECHO_D, INPUT);
+  pinMode(ENA, OUTPUT); pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT); pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
+  Serial.begin(115200);
+  delay(1000);  // petit temps pour poser le robot
+}
+
+void loop() {
+  // 1) On mesure les deux distances
+  float dG = mesurer(TRIG_G, ECHO_G);
+  float dD = mesurer(TRIG_D, ECHO_D);
+
+  bool murG = dG > 0 && dG < MUR_MAX;  // mur visible a gauche ?
+  bool murD = dD > 0 && dD < MUR_MAX;  // mur visible a droite ?
+
+  // 2) Une ouverture ? -> on tourne vers elle
+  if (!murG && murD) { tourner(120);  return; }  // mur gauche disparu
+  if (murG && !murD) { tourner(-120); return; }  // mur droit disparu
+  if (!murG && !murD) { tourner(120);  return; } // impasse : demi-tour
+
+  // 3) Sinon : on se recentre au milieu du couloir
+  //    erreur = dG - dD : nulle si le robot est pile au milieu
+  float erreur = dG - dD;
+  float correction = KP * erreur;
+  moteur(ENA, IN1, IN2, VITESSE - correction);
+  moteur(ENB, IN3, IN4, VITESSE + correction);
+
+  Serial.print(dG); Serial.print(" | "); Serial.println(dD);
+}
+
+/* ====================== A DIRE A L'ORAL ======================
+   - Le capteur HC-SR04 envoie une impulsion ultrason, on mesure le
+     temps de l'echo : distance = temps x vitesse du son / 2 (aller-retour).
+   - Erreur = dG - dD : elle est nulle si on est pile au milieu du couloir.
+   - Correcteur proportionnel (P) : plus l'erreur est grande, plus on
+     corrige fort (roue gauche et droite a des vitesses differentes).
+     Sur le code complet on ajoute un terme derive (D) qui amortit les
+     oscillations ; ici on garde juste le principe pour l'oral.
+   - Une distance > 200 cm = plus de mur = ouverture -> on tourne.
+   =============================================================== */
